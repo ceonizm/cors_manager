@@ -1,0 +1,7 @@
+services:
+  http_middleware.cors:
+    class: Drupal\cors_manager\Stack\CorsMiddleware
+    arguments: ["@service_container"]
+    tags:
+      - { name: http_middleware, priority: 250 }
+
