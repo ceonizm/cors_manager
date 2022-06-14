@@ -51,8 +51,8 @@ class CorsMiddleware implements HttpKernelInterface {
           $options = array_merge($options, array_filter($override));
         }
       }
-      $cors = new Cors($this->app, $options);
-      return $cors->handle($request, $type, $catch);
     }
+    $cors = new Cors($this->app, $options);
+    return $cors->handle($request, $type, $catch);
   }
 }
