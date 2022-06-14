@@ -1,5 +1,5 @@
 cors_manager.admin_form:
-  path: '/admin/config/cors_manager'
+  path: '/admin/config/services/cors_manager'
   defaults:
     _form: '\Drupal\cors_manager\Form\CorsManagerAdminForm'
     _title: 'Administer CORS'
