@@ -44,6 +44,9 @@ class CorsManagerAdminForm extends ConfigFormBase {
     return $result;
   }
 
+  /**
+   * @inheritDoc
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $configGlobal = $this->config('cors_manager.config');
 
@@ -61,17 +64,30 @@ class CorsManagerAdminForm extends ConfigFormBase {
 
     $addOverrideCheckboxState = $form_state->getUserInput()['overrides']['add_override_link'];
 
-    $overrideAdded = FALSE;
+    $overrideChanged = FALSE;
     $isAjax = $form_state->getTriggeringElement() !== NULL;
     if ($isAjax) {
       $triggering = $form_state->getTriggeringElement();
-      if ($triggering['#ajax']['callback'] == '::ajaxAddOverride') {
+      switch ($triggering['#ajax']['callback'] ) {
+        case '::ajaxAddOverride':
         $newOverride = $form_state->getValue(['overrides', 'new']);
         if (!empty($newOverride)) {
           $overrides[] = array_merge( $newOverride, $newOverride['checkboxes']);
-          $overrideAdded = TRUE;
+          $overrideChanged = TRUE;
           $addOverrideCheckboxState = NULL;
         }
+        break;
+        case '::ajaxEraseOverride':
+          if( preg_match('/^erase_btn_(.+)$/', $triggering['#name'], $matches) ) {
+            $index = $matches[1];
+            $index = array_search( $index, array_keys($overrides) );
+            if ($index !== FALSE) {
+              array_splice($overrides, $index, 1);
+              $overrideChanged = TRUE;
+            }
+          }
+
+        break;
       }
     }
 
@@ -82,21 +98,31 @@ class CorsManagerAdminForm extends ConfigFormBase {
       '#prefix' => '<div id="overrides-wrapper">',
       '#suffix' => '</div>',
     ];
-    if ($overrideAdded) {
-      $form['overrides']['#description'] = $this->t('An override has just been added. Don\'t forget to press save button to get it saved');
+    if ($overrideChanged) {
+      $form['overrides']['#description'] = $this->t('An override has just been added or removed.<br> Don\'t forget to press save button to get it saved');
     }
 
     foreach ($overrides as $index => $override) {
+      $form['overrides']['list'][$index] = [
+        '#type' => 'fieldset'
+      ];
+      $form['overrides']['list'][$index]['erase_btn'] = [
+        '#type' => 'button',
+        '#name' => 'erase_btn_'.$index,
+        '#value' => $this->t('erase override'),
+        '#ajax' => [
+          'wrapper' => 'overrides-wrapper',
+          'callback' => '::ajaxEraseOverride'
+        ]
+      ];
       $form['overrides']['list'][$index]['routeName'] = [
         '#type' => 'textfield',
-        '#title' => $this->t('Route name'),
-        '#description' => $this->t('route or path'),
+        '#title' => $this->t('Path name'),
+        '#description' => $this->t('path'),
         '#default_value' => $override['routeName'],
       ];
       $this->buildConfigFields($form['overrides']['list'][$index], $override);
-
     }
-
 
     $form['overrides']['add_override_link'] = [
       '#type' => 'checkbox',
@@ -110,7 +136,6 @@ class CorsManagerAdminForm extends ConfigFormBase {
 
 
     if ($addOverrideCheckboxState) {
-
       $form['overrides']['new'] = [
         '#type' => 'fieldset',
         //        '#title' => $this->t('Add Override'),
@@ -151,6 +176,10 @@ class CorsManagerAdminForm extends ConfigFormBase {
     return $form['overrides'];
   }
 
+  public static function ajaxEraseOverride(array &$form, FormStateInterface $form_state) {
+    return $form['overrides'];
+  }
+
   public static function displayAddOverridePanel(array &$form, FormStateInterface $form_state) {
     return $form['overrides'];
   }
@@ -188,21 +217,18 @@ class CorsManagerAdminForm extends ConfigFormBase {
     $element['checkboxes']['exposedHeaders'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Exposed headers'),
-      //      '#description' => $this->t('Exposed headers'),
       '#default_value' => $config['exposedHeaders'],
     ];
 
     $element['checkboxes']['maxAge'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Max Age'),
-      //      '#description' => $this->t('Max age.'),
       '#default_value' => $config['maxAge'],
     ];
 
     $element['checkboxes']['supportCredentials'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Support credentials'),
-      //      '#description' => $this->t('Support credentials'),
       '#default_value' => $config['supportCredentials'],
     ];
   }
@@ -217,7 +243,7 @@ class CorsManagerAdminForm extends ConfigFormBase {
     $global['allowedOrigins'] = array_map( 'trim', explode(PHP_EOL, $form_state->getValue('allowedOrigins')));
     $global['exposedHeaders'] = $form_state->getValue(['checkboxes','exposedHeaders']);
     $global['maxAge'] = $form_state->getValue(['checkboxes','maxAge']);
-    $global['maxAge'] = $form_state->getValue(['checkboxes','supportCredentials']);
+    $global['supportCredentials'] = $form_state->getValue(['checkboxes','supportCredentials']);
     $config->set('global', $global);
 
     $overrides = $form_state->getValue(['overrides', 'list']);
