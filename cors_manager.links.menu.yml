@@ -1,0 +1,4 @@
+cors_manager.config:
+  title: 'Cors Manager Configuration'
+  parent: system.admin_config
+  route_name: cors_manager.admin_form

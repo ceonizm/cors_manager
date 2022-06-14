@@ -1,0 +1,6 @@
+name: 'Cors Manager'
+type: module
+description: 'Make CORS configuration administrable '
+core: 8.x
+core_version_requirement: ^8 || ^9
+package: 'Custom'
