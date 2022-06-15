@@ -1,0 +1,15 @@
+{
+    "name": "ceonizm/cors_manager",
+    "description": "Makes the Drupal 9 CORS settings administrable from the back-office",
+    "minimum-stability": "stable",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "François Boukhalfa",
+            "homepage": "https://github.com/ceonizm",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+    }
+}
