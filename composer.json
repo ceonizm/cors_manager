@@ -3,6 +3,7 @@
     "description": "Makes the Drupal 9 CORS settings administrable from the back-office",
     "minimum-stability": "stable",
     "license": "proprietary",
+    "type": "drupal-module",
     "authors": [
         {
             "name": "François Boukhalfa",
