@@ -1,0 +1,9 @@
+global:
+  allowedHeaders: []
+  allowedMethods: []
+  allowedOrigins: []
+  exposedHeaders: false
+  maxAge: false
+  supportCredentials: false
+
+per_route_overrides: []
